@@ -1,0 +1,113 @@
+################
+#Install Option#
+################
+
+#platform=x86, AMD64, 又は Intel EM64T
+#version=DEVEL
+# Install OS instead of upgrade
+install
+# Use CDROM installation media
+cdrom
+# Use graphical install
+graphical
+# Do not configure the X Window System
+skipx
+# Installation logging level
+logging --level=info
+# After the installation
+poweroff
+
+#########
+#Network#
+#########
+
+# Front Network
+network --device eth0 --onboot yes --bootproto static --ip <%= @ipaddr %> --netmask 255.255.255.0 --gateway 172.16.62.254 --nameserver 172.16.48.12 --hostname <%= @host %> --noipv6 --activate
+
+##########
+#Location#
+##########
+
+# System keyboard
+keyboard jp106
+# System language
+lang ja_JP
+# System timezone
+timezone  Asia/Tokyo
+
+# System authorization information
+auth  --useshadow  --passalgo=sha512
+# Root password
+rootpw <%= @password %>
+
+############
+#Partitiong#
+############
+
+# Clear the Master Boot Record
+zerombr
+# Partition clearing information
+clearpart --all --initlabel
+# System bootloader configuration
+bootloader --location=mbr
+# Disk partitioning information
+part /boot --asprimary --fstype="ext4" --size=250 --ondisk=vda
+part swap --asprimary --fstype="swap" --size=2048 --ondisk=vda
+
+part / --asprimary --fstype="ext4" --grow --size=3072 --ondisk=vda
+
+##########
+#Services#
+##########
+
+# Firewall configuration
+firewall --disabled
+# SELinux configuration
+selinux --disabled
+
+##########
+#Packages#
+##########
+
+%packages
+@client-mgmt-tools
+@console-internet
+@debugging
+@development
+@directory-client
+@hardware-monitoring
+@japanese-support
+@java-platform
+@large-systems
+@network-file-system-client
+@performance
+@perl-runtime
+@system-management-snmp
+@server-platform
+@server-policy
+pax
+python-dmidecode
+oddjob
+sgpio
+jpackage-utils
+certmonger
+pam_krb5
+krb5-workstation
+perl-DBD-SQLite
+%end
+
+##########
+#Update with new authorized_keys file
+##########
+%post
+mkdir /root/.ssh
+chmod 700 /root/.ssh
+wget http://172.16.62.126/kickstart/cfgs/root.authorized_keys -O /root/authorized_keys
+mv -f /root/authorized_keys /root/.ssh/authorized_keys
+chmod 600 /root/.ssh/authorized_keys
+
+# yum update
+
+/usr/bin/yum -y update
+
+%end
