@@ -39,7 +39,7 @@ describe Floppy_Image_Maker do
 
   it "イメージファイルの作成" do
     fim = Floppy_Image_Maker.new("test.cfg", "/tmp/test.img")
-    fim.create_image
+    fim.create_image_and_format
     FileTest.exist?("/tmp/test.img").should be_true
   end
 end

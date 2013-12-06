@@ -15,50 +15,59 @@ def capture(stream)
     result
 end
 
-describe Argument_Validator do
-  it "実行した時に引数が足りないとエラーメッセージが表示される" do
-    test = ["test", "test"]
-    agv = Argument_Validator.new
-    expect{ agv.number(*test) }.to raise_error(StandardError,
+describe Validator do
+  before(:each) do
+    @correct_argv = [ "test", "test", "test" ]
+    @incorrect_argv1 = [ "test" ]
+    @incorrect_argv2 = [ "test", "test" ,"test", "test"]
+    @correct_ipaddr = "172.16.62.120"
+    @incorrect_ipaddr = "10"
+    @correct_template_file = "./ks.cfg.erb"
+    @incorrect_template_file = "./dummy.erb"
+  end
+
+  it "引数が足りなければエラー" do
+    vali = Validator.new(@incorrect_argv1, @correct_ipaddr, @correct_template_file)
+    expect{ vali.argument_number }.to raise_error(StandardError,
                                               "usage ./kensyo_ks.rb <hostname> <ip address> <root password>")
   end
 
-  it "引数が正しいと引数が戻り値になる" do
-    test = ["test", "test", "test"]
-    agv = Argument_Validator.new
-    agv.number(*test).should == test
+  it "引数が多ければエラー" do
+    vali = Validator.new(@incorrect_argv2, @correct_ipaddr, @correct_template_file)
+    expect{ vali.argument_number }.to raise_error(StandardError,
+                                              "usage ./kensyo_ks.rb <hostname> <ip address> <root password>")
   end
-end
 
-describe Ipaddress_Validator do
-  it "実行したときの引数の2つ目が ip address 形式じゃないとエラーメッセージが表示される" do
-    ipadd_check = Ipaddress_Validator.new
-    expect{ ipadd_check.check(10) }.to raise_error(StandardError,
+  it "引数の2つ目が ip address 形式じゃないとエラー" do
+    vali = Validator.new(@correct_argv, @incorrect_ipaddr, @correct_template_file)
+    expect{ vali.ipaddress_check }.to raise_error(StandardError,
                                                    "第 2 引数にはIP アドレスを入力してください")
   end
 
-  it "引数が ip address 形式の場合引数のip address が戻り値になる" do
-    ipadd_check = Ipaddress_Validator.new
-    ipadd_check.check("172.16.62.120").should == "172.16.62.120"
+  it "テンプレートファイルが無いとエラー" do
+    vali = Validator.new(@correct_argv, @correct_ipaddr, @incorrect_template_file)
+    expect{ vali.template_file_check }.to raise_error(StandardError, "テンプレートがありません")
   end
 end
 
 describe Ks do
-  after(:each) do
-    File.delete("/tmp/ks.cfg")
+  before(:each) do
+    @correct_hostname = "test"
+    @correct_ipaddr = "172.16.62.120"
+    @correct_password = "password"
+    @correct_template_file = "./ks.cfg.erb"
+    @correct_outputfile = "/tmp/ks.cfg"
   end
 
-  it "テンプレートファイルが無いとエラーになる" do
-    kick = Ks.new("test", "172.16.62.120", "test", "./dummy.erb", "/tmp/ks.cfg")
-    expect{ kick.ks_create }.to raise_error(StandardError,
-                                            "Template file not found")
+  after(:each) do
+    File.delete(@correct_outputfile)
   end
 
   it "キックスタートファイルが生成される"do
-    kick = Ks.new("test", "172.16.62.120", "test", "./ks.cfg.erb", "/tmp/ks.cfg")
+    kick = Ks.new(@correct_hostname, @correct_ipaddr, @correct_password, @correct_template_file, @correct_outputfile)
     kick.ks_create
     kick.ks_file_output
-    FileTest.exist?("/tmp/ks.cfg").should be_true
+    FileTest.exist?(@correct_outputfile).should be_true
   end
 
 #  it "キックスタートファイルの中身が意図した通りである" do

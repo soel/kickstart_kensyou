@@ -15,12 +15,6 @@ class Ks
   end
 
   def ks_create
-    if File.exist?(@template_file) == false
-      #puts "Template file not found"
-      #exit 1
-      raise StandardError, "Template file not found"
-    end
-
     #@erb = ERB.new(File.read(@template_file),nil,"-")
     @erb = ERB.new(File.read(@template_file))
   end
@@ -36,47 +30,36 @@ class Ks
   end
 end
 
-class Argument_Validator
+class Validator
 
-  def number(*argv)
-    unless argv.size == 3
+  def initialize(*argv, ipaddr, template_file)
+    @argv = argv
+    @ipaddr = ipaddr
+    @template_file = template_file
+  end
+
+  def argument_number
+    unless @argv.size == 3
       raise StandardError, "usage ./kensyo_ks.rb <hostname> <ip address> <root password>"
     end
-
-    return *argv
   end
-end
 
-class Ipaddress_Validator
-
-  def check(ipaddr)
+  def ipaddress_check
     ipaddr_regexp = /^(\d|[01]?\d\d|2[0-4]\d|25[0-5])\.(\d|[01]?\d\d|2[0-4]\d|25[0-5])\.(\d|[01]?\d\d|2[0-4]\d|25[0-5])\.(\d|[01]?\d\d|2[0-4]\d|25[0-5])$/
 
-    unless ipaddr_regexp === ipaddr
+    unless ipaddr_regexp === @ipaddr
       raise StandardError, "第 2 引数にはIP アドレスを入力してください"
     end
+  end
 
-    return ipaddr
+  def template_file_check
+    if File.exist?(@template_file) == false
+      raise StandardError, "テンプレートがありません"
+    end
   end
 end
 
 if __FILE__ == $0
-
-  begin
-    agv = Argument_Validator.new
-    agv.number(*ARGV)
-  rescue => e
-    puts e.message
-    exit
-  end
-
-  begin
-    ipadd_check = Ipaddress_Validator.new
-    ipadd_check.check(ARGV[1])
-  rescue => e
-    puts e.message
-    exit
-  end
 
   host = ARGV[0]
   ipaddr = ARGV[1]
@@ -84,17 +67,18 @@ if __FILE__ == $0
   template_file = './ks.cfg.erb'
   ks_file = 'ks.cfg'
 
-
-  kickstart_file = Ks.new(host, ipaddr, password, template_file, ks_file)
-  #puts kickstart_file.instance_variable_get(:@host)
-
   begin
-    kickstart_file.ks_create
+    vali = Validator.new(*ARGV, ipaddr, template_file)
+    vali.argument_number
+    vali.ipaddress_check
+    vali.template_file_check
   rescue => e
     puts e.message
     exit
   end
 
+  kickstart_file = Ks.new(host, ipaddr, password, template_file, ks_file)
+  kickstart_file.ks_create
   kickstart_file.ks_file_output
   puts ks_file + "  ファイルを作成しました"
 end
