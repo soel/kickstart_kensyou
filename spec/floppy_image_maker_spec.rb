@@ -1,6 +1,19 @@
 # -*- encoding: utf-8 -*-
 
 require "./floppy_image_maker.rb"
+require "stringio"
+
+def capture(stream)
+    begin
+        stream = stream.to_s
+        eval "$#{stream} = StringIO.new"
+        yield
+        result = eval("$#{stream}").string
+    ensure
+        eval "$#{stream} = #{stream.upcase}"
+    end
+    result
+end
 
 describe Validator do
   before(:each) do
@@ -33,13 +46,31 @@ end
 
 
 describe Floppy_Image_Maker do
-  after(:each) do
-    File.delete("/tmp/test.img")
+  before(:all) do
+    @fim = fim = Floppy_Image_Maker.new("test.cfg", "/tmp/test.img")
   end
 
-  it "イメージファイルの作成" do
-    fim = Floppy_Image_Maker.new("test.cfg", "/tmp/test.img")
-    fim.create_image_and_format
-    FileTest.exist?("/tmp/test.img").should be_true
+  after(:all) do
+    @fim.create_image
+  end
+
+  it "イメージファイルの作成されることの確認" do
+    capture(:stdout) { @fim.create_image }.should == "イメージ作成の処理が終了しました\n"
+  end
+
+  it "フォーマットの確認" do
+    capture(:stdout) { @fim.format_image }.should == "イメージフォーマットの処理が終了しました\n"
+  end
+
+  it "マウント処理の確認" do
+    capture(:stdout) { @fim.mount_image }.should == "/mnt/vfd へのマウントの処理が終了しました\n"
+  end
+
+  it "ファイルコピーの確認" do
+    capture(:stdout) { @fim.cp_file }.should == "イメージへのファイルのコピーの処理が終了しました\n"
+  end
+
+  it "アンマウントの確認" do
+    capture(:stdout) { @fim.umount }.should == "アンマウントの処理が終了しました\n"
   end
 end

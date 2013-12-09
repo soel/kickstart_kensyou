@@ -9,25 +9,54 @@ class Floppy_Image_Maker
     @out_put_image = out_put_image
   end
 
-  def create_image_and_format
+  def create_image
     dd_command = "dd if=/dev/zero of=" + @out_put_image + " bs=1KiB count=1440"
-    mkdosfs_command = "mkdosfs" + @out_put_image
     status, stdout, stderr = systemu dd_command
-    puts stderr
-    status, stdout, stderr = systemu mkdosfs_command
-    puts stderr
+    #puts status
+    stdio(status, stderr, "イメージ作成")
   end
 
-  def mount_cp_umount
-    status, stdout, stderr = systemu "mkdir /mnt/vfd"
-    mount_command = "mount -o loop " + @out_put_image + " /mnt/vfd"
-    status, stdout, stderr = systemu mount_command
-    cp_command = "cp " + @source_file + " /mnt/vfd"
-    status, stdout, stderr = systemu cp_command
-    puts stderr
-    status, stdout, stderr = systemu "umount /mnt/vfd"
-    puts stderr
+  def format_image
+    mkdosfs_command = "mkdosfs " + @out_put_image
+    status, stdout, stderr = systemu mkdosfs_command
+    #puts status
+    stdio(status, stderr, "イメージフォーマット")
   end
+
+  def mount_image
+    unless Dir.exist?("/mnt/vfd")
+      status, stdout, stderr = systemu "sudo mkdir /mnt/vfd"
+      #puts status
+      stdio(status, stderr, "/mnt/vfd の作成")
+    end
+    mount_command = "sudo mount -o loop " + @out_put_image + " /mnt/vfd"
+    status, stdout, stderr = systemu mount_command
+    stdio(status, stderr, "/mnt/vfd へのマウント")
+    #puts status 
+  end
+
+  def cp_file
+    cp_command = "sudo cp " + @source_file + " /mnt/vfd"
+    status, stdout, stderr = systemu cp_command
+    #puts status
+    stdio(status, stderr, "イメージへのファイルのコピー")
+  end
+
+  def umount
+    status, stdout, stderr = systemu "sudo umount /mnt/vfd"
+    #puts status
+    stdio(status, stderr, "アンマウント")
+  end
+
+  def stdio(status, stderr, display)
+    if status.success?
+      print display
+      print "の処理が終了しました\n"
+    elsif stderr
+      puts stderr
+    end
+  end
+
 end
 
 class Validator
@@ -65,7 +94,10 @@ if __FILE__ == $0
   end
 
   image = Floppy_Image_Maker.new(source_file, out_put_image)
-  image.create_image_and_format
-  image.mount_cp_umount
+  image.create_image
+  image.format_image
+  image.mount_image
+  image.cp_file
+  image.umount
 
 end
