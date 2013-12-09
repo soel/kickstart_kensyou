@@ -13,7 +13,9 @@ class Floppy_Image_Maker
     dd_command = "dd if=/dev/zero of=" + @out_put_image + " bs=1KiB count=1440"
     mkdosfs_command = "mkdosfs" + @out_put_image
     status, stdout, stderr = systemu dd_command
-    status, stdout, stderr = mkdosfs_command
+    puts stderr
+    status, stdout, stderr = systemu mkdosfs_command
+    puts stderr
   end
 
   def mount_cp_umount
@@ -22,7 +24,9 @@ class Floppy_Image_Maker
     status, stdout, stderr = systemu mount_command
     cp_command = "cp " + @source_file + " /mnt/vfd"
     status, stdout, stderr = systemu cp_command
+    puts stderr
     status, stdout, stderr = systemu "umount /mnt/vfd"
+    puts stderr
   end
 end
 
