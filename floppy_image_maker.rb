@@ -53,8 +53,8 @@ if __FILE__ == $0
 
   begin
     vali = Validator.new(source_file, *ARGV)
-    vali.source_file_check
     vali.argument_number_check
+    vali.source_file_check
   rescue => e
     puts e.message
     exit
