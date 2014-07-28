@@ -26,19 +26,18 @@ centos 6/redhat 6 用の kickstart file を自動生成します
 
 ## 使い方
 1. kickstart ファイルの作成
-```bash
-ruby kensyo_ks.rb <hostname> <ip address> <root password>
-```
+  ```bash
+  ruby kensyo_ks.rb <hostname> <ip address> <root password>
+  ```
 
 1. フロッピーイメージの作成
-```bash
-ruby floppy_image_maker.rb <source_file> <out_put_image>
-```
+  ```bash
+  ruby floppy_image_maker.rb <source_file> <out_put_image>
+  ```
 
 ## その他情報
 - <ip address> 部にはバリデーションがかかっていて IP アドレス形式以外は入力できません
-- インストールされるバッケージは Basic server 相当です
-  詳しくは ks.cfg.erb の %packages 以下を参照してください
+- インストールされるバッケージは Basic server 相当です。詳しくは ks.cfg.erb の %packages 以下を参照してください
   
 ## ライセンス
 - LICENSE.txt を御覧ください
