@@ -29,11 +29,13 @@ centos 6/redhat 6 用の kickstart file を自動生成します
   ```bash
   ruby kensyo_ks.rb <hostname> <ip address> <root password>
   ```
+  
 1. /mnt/vfd の作成
   /mnt/vfd でフロッピーイメージを作成するので必要となります
   ```bash
   mkdir /mnt/vfd
   ```
+  
 1. フロッピーイメージの作成
   ```bash
   sudo ruby floppy_image_maker.rb <source_file> <out_put_image>
