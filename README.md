@@ -31,10 +31,10 @@ centos 6/redhat 6 用の kickstart file を自動生成します
   ```
   
 1. /mnt/vfd の作成
-  /mnt/vfd でフロッピーイメージを作成するので必要となります
   ```bash
   mkdir /mnt/vfd
   ```
+  /mnt/vfd でフロッピーイメージを作成するので必要となります
   
 1. フロッピーイメージの作成
   ```bash
