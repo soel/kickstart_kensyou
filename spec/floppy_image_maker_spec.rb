@@ -26,8 +26,11 @@ describe Validator do
 
   it "ソースファイルがなければエラー" do
     vali = Validator.new(@incorrect_source_file, @correct_argv)
+    #vali = Validator.new("hogehoge", "tt")
+    #expect{ vali.source_file_check }.to raise_error(
+    #  StandardError, "Source file not found")
     expect{ vali.source_file_check }.to raise_error(
-      StandardError, "Source file not found")
+      StandardError)
   end
 
   it "引数が足りなければエラー" do
@@ -42,7 +45,7 @@ describe Validator do
       StandardError, "usage ./floppy_image_maker.rb <source_file> <out_put_image>")
   end
 end
-    
+
 
 
 describe Floppy_Image_Maker do

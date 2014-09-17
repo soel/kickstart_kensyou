@@ -32,7 +32,7 @@ class Floppy_Image_Maker
     mount_command = "sudo mount -o loop " + @out_put_image + " /mnt/vfd"
     status, stdout, stderr = systemu mount_command
     stdio(status, stderr, "/mnt/vfd へのマウント")
-    #puts status 
+    #puts status
   end
 
   def cp_file
@@ -80,7 +80,7 @@ class Validator
 end
 
 if __FILE__ == $0
-  
+
   source_file = ARGV[0]
   out_put_image = ARGV[1]
 
